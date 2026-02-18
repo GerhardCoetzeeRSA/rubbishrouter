@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RubbishRouter | Business Partner Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; color: #2c3e50; line-height: 1.6; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .tier { border: 2px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
+        .tier:hover { border-color: #27ae60; background: #f9fffb; }
+        .preview-box { 
+            width: 100%; height: 70px; border: 2px dashed #ccc; 
+            margin: 20px 0; display: flex; align-items: center; 
+            justify-content: center; overflow: hidden; position: relative;
+        }
+        #preview-img { max-height: 100%; max-width: 100%; object-fit: contain; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ddd; }
+        .pay-btn { background: #ff5722; color: white; padding: 15px; width: 100%; border: none; font-weight: bold; font-size: 18px; border-radius: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🚀 Advertise in Potchefstroom</h2>
+    <p>Reach thousands of residents exactly when they are checking their bins.</p>
+
+    <div class="tier">
+        <strong>🥇 Premium Banner (Top) - R500/mo</strong>
+        <p>Fixed at the top of the map. High visibility.</p>
+    </div>
+
+    <div class="tier">
+        <strong>🥈 Standard Banner (Bottom) - R250/mo</strong>
+        <p>Rotates at the bottom of the resident screen.</p>
+    </div>
+
+    <h3>1. Design Your Ad</h3>
+    <input type="text" id="biz-text" placeholder="Your Ad Text (e.g. 50% off Pizza!)">
+    <input type="url" id="biz-link" placeholder="Link to your Website/WhatsApp">
+    
+    <p>Upload Logo/Banner (Auto-sized to fit 320x70):</p>
+    <input type="file" id="imageInput" accept="image/*">
+    
+    <div class="preview-box" id="previewContainer">
+        <span id="placeholder-text">Live Ad Preview</span>
+        <img id="preview-img" src="">
+    </div>
+
+    <button class="pay-btn" onclick="redirectToPayFast()">PAY & PUBLISH AD</button>
+</div>
+
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const previewImg = document.getElementById('preview-img');
+    const placeholder = document.getElementById('placeholder-text');
+
+    // Auto-sizing logic
+    imageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                placeholder.style.display = 'none';
+                
+                // Explain to the business that we are "Letterboxing" the image
+                console.log("Image auto-fitted to 70px height container.");
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function redirectToPayFast() {
+        // You will replace this with your actual PayFast merchant link
+        // You can pass the business name as a parameter
+        const amount = 250.00; 
+        const bizName = document.getElementById('biz-text').value;
+        window.location.href = `https://www.payfast.co.za/eng/process?merchant_id=YOUR_ID&amount=${amount}&item_name=Ad_${bizName}`;
+    }
+</script>
+</body>
+</html>
