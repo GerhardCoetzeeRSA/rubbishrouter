@@ -15,4 +15,4 @@ RubbishRouter is a real-time GPS solution designed to modernize waste collection
 3. Register your suburb to begin tracking.
 
 ### 📧 Contact
-For Beta access or municipal inquiries, please contact the development team.
+For Beta access or municipal inquiries, please contact the development team at info@coetzeedataconsultants.co.za.
