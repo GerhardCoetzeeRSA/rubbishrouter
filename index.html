@@ -2,86 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RubbishRouter | Resident Portal</title>
+    <title>RubbishRouter | Potchefstroom Resident Portal</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <style>
-        :root { --primary: #27ae60; --dark: #2c3e50; --alert: #e74c3c; --waiting: #7f8c8d; --accent: #f1c40f; --beta: #3498db; }
+        :root { --primary: #27ae60; --dark: #2c3e50; --alert: #e74c3c; --accent: #f1c40f; --beta: #3498db; }
         body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; overflow: hidden; background: #f4f7f6; }
         
-        /* PotholePatrol Style Banners */
+        /* Ticker Style - Top Banner */
         #top-ad {
             position: absolute; top: 0; left: 0; right: 0; height: 50px;
             background: var(--dark); color: white; z-index: 3000;
             display: flex; align-items: center; overflow: hidden;
             border-bottom: 3px solid var(--accent);
         }
-        .ticker-wrapper { width: 100%; display: flex; align-items: center; }
         .ticker-text {
             white-space: nowrap; padding-left: 100%;
-            animation: ticker 25s linear infinite;
+            animation: ticker 30s linear infinite;
             font-size: 14px; font-weight: bold;
         }
-        @keyframes ticker {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
-        }
+        @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
+        /* Rotating Slot - Bottom Banner */
         #bottom-ad {
-            position: absolute; bottom: 0; left: 0; right: 0; height: 75px;
+            position: absolute; bottom: 0; left: 0; right: 0; height: 85px;
             background: white; z-index: 3000; border-top: 1px solid #ddd;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.5s ease-in-out;
         }
-        .ad-fade { animation: fadeInOut 8s infinite; text-align: center; width: 100%; }
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; transform: translateY(10px); }
-            10%, 90% { opacity: 1; transform: translateY(0); }
-        }
+        .ad-slot-container { text-align: center; transition: opacity 0.5s ease-in-out; width: 100%; padding: 0 15px; }
+        .ad-slot-container.fade-out { opacity: 0; }
 
-        /* Screens & Overlays */
+        /* Interface Layers */
         .overlay-screen { position: fixed; inset: 0; background: white; z-index: 6000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        .content-width { max-width: 400px; width: 100%; }
         #map { height: 100vh; width: 100%; z-index: 1; }
+        
         #ui-overlay { position: absolute; top: 65px; left: 10px; right: 10px; z-index: 2000; pointer-events: none; }
         .status-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; pointer-events: auto; border: 3px solid var(--primary); }
+        
+        /* Buttons */
         .btn-main { padding: 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; margin-top: 10px; cursor: pointer; width: 100%; }
-        .fab { position: fixed; z-index: 4000; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; }
-        #token-btn { bottom: 90px; right: 15px; width: 60px; height: 60px; font-size: 28px; background: #ff5722; }
-        #help-btn { bottom: 90px; left: 15px; width: 45px; height: 45px; font-size: 20px; background: var(--dark); }
+        .btn-biz { background: var(--accent); color: var(--dark); border: none; padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; width: 100%; }
+        
+        .fab { position: fixed; z-index: 4000; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); color: white; display: flex; align-items: center; justify-content: center; }
+        #help-btn { bottom: 100px; left: 15px; width: 45px; height: 45px; font-size: 20px; background: var(--dark); }
+        #token-btn { bottom: 100px; right: 15px; width: 60px; height: 60px; font-size: 28px; background: #ff5722; }
     </style>
 </head>
 <body>
 
     <div id="onboarding-screen" class="overlay-screen">
-        <h1 id="onboard-title" style="color:var(--primary);">RubbishRouter</h1>
-        <p>Potchefstroom Smart Waste Pilot</p>
-        <button id="onboard-action-btn" onclick="handleOnboardClick()" class="btn-main">CONTINUE TO SETUP</button>
+        <div class="content-width">
+            <h1 id="onboard-title" style="color:var(--primary); margin-bottom:0;">RubbishRouter</h1>
+            <p style="color:#666; margin-top:5px;">Smart Waste Tracking Portal</p>
+            <div style="text-align:left; background:#f9f9f9; padding:15px; border-radius:10px; margin:20px 0;">
+                <small style="color:var(--primary); font-weight:bold;">FOR RESIDENTS:</small>
+                <p style="font-size:13px; margin:5px 0;">Track municipal trucks in real-time and get "Bins Out" notifications.</p>
+            </div>
+            <button id="onboard-action-btn" onclick="handleOnboardClick()" class="btn-main">CONTINUE TO SETUP</button>
+            <button onclick="window.location.href='pay.html'" class="btn-biz">💼 BUSINESS: BOOK AN AD SLOT</button>
+        </div>
     </div>
 
     <div id="reg-screen" class="overlay-screen" style="display: none;">
-        <input type="text" id="res-name" style="padding:15px; width:80%; margin:10px;" placeholder="Full Name">
-        <input type="text" id="res-city" style="padding:15px; width:80%; margin:10px;" placeholder="City">
-        <button id="main-reg-btn" class="btn-main">REGISTER</button>
+        <div class="content-width">
+            <h2>Resident Profile</h2>
+            <p style="font-size:14px; color:#666;">Enter your details to link your address.</p>
+            <input type="text" id="res-name" style="padding:15px; width:100%; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing: border-box;" placeholder="Full Name">
+            <input type="text" id="res-city" style="padding:15px; width:100%; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing: border-box;" placeholder="City (Potchefstroom)">
+            <button id="main-reg-btn" class="btn-main">ACTIVATE BETA ACCESS</button>
+        </div>
+    </div>
+
+    <div id="success-screen" class="overlay-screen" style="display: none;">
+        <div class="content-width">
+            <div style="font-size:50px;">🎉</div>
+            <h1 style="color:var(--primary); margin:10px 0;">You're In!</h1>
+            <p style="color:#666;">Your 2-week free trial of the tracking service is now active.</p>
+            <button onclick="closeSuccess()" class="btn-main">START TRACKING</button>
+        </div>
     </div>
 
     <div id="top-ad">
-        <div class="ticker-wrapper">
-            <div class="ticker-text" id="top-ticker-content">
-                ⚠️ MUNICIPAL NOTICE: PLEASE PLACE BINS ON PAVEMENT BY 07:00 AM • NEXT COLLECTION HOLIDAY: MARCH 21st • REPORT ILLEGAL DUMPING VIA HELP TAB
-            </div>
+        <div class="ticker-text">
+            ⚠️ MUNICIPAL NOTICE: PLEASE PLACE BINS ON PAVEMENT BY 07:00 AM • WASTE COLLECTION ON SCHEDULE FOR WARD 4 • POWERED BY RUBBISHROUTER SMART CITY TECH
         </div>
     </div>
 
     <div id="bottom-ad">
-        <div id="ad-content" class="ad-fade">Connecting to local deals...</div>
+        <div id="ad-slot" class="ad-slot-container">
+            <strong>Initializing local ad-stream...</strong>
+        </div>
     </div>
-    
+
     <div id="ui-overlay">
         <div class="status-card"><div id="status-text">🛰️ CALIBRATING GPS...</div></div>
     </div>
 
-    <button id="token-btn" class="fab">🔔</button>
     <button id="help-btn" class="fab" onclick="showHelp()">?</button>
+    <button id="token-btn" class="fab">🔔</button>
 
     <div id="map"></div>
 
@@ -102,30 +121,50 @@
         let map, geofence, truckMarker;
         const truckIcon = L.icon({ iconUrl: 'https://img.icons8.com/color/96/garbage-truck.png', iconSize: [50, 50] });
 
-        // Onboarding Logic
+        // Navigation & UI Logic
         window.handleOnboardClick = () => {
-            if (localStorage.getItem('rr_name')) document.getElementById('onboarding-screen').style.display = 'none';
-            else { document.getElementById('onboarding-screen').style.display = 'none'; document.getElementById('reg-screen').style.display = 'flex'; }
+            if (localStorage.getItem('rr_name')) {
+                document.getElementById('onboarding-screen').style.display = 'none';
+            } else {
+                document.getElementById('onboarding-screen').style.display = 'none';
+                document.getElementById('reg-screen').style.display = 'flex';
+            }
         };
 
         window.showHelp = () => {
-            document.getElementById('onboard-title').innerText = "Help & Feedback";
+            document.getElementById('onboard-title').innerText = "Help & Business Portal";
             document.getElementById('onboard-action-btn').innerText = "BACK TO MAP";
             document.getElementById('onboarding-screen').style.display = 'flex';
         };
 
-        document.getElementById('main-reg-btn').addEventListener('click', async () => {
+        window.closeSuccess = () => {
+            document.getElementById('success-screen').style.display = 'none';
+            if(confirm("Trial active! Would you like to secure your R15 monthly subscription now to prevent service interruption?")) {
+                window.location.href = 'pay.html';
+            }
+        };
+
+        // Registration Process
+        document.getElementById('main-reg-btn').addEventListener('click', () => {
             const name = document.getElementById('res-name').value;
             const city = document.getElementById('res-city').value;
+            if(!name || !city) return alert("Please fill in all fields.");
+
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                await set(ref(db, `cities/${city}/residents/${name}`), { lat: pos.coords.latitude, lng: pos.coords.longitude });
+                await set(ref(db, `cities/${city}/residents/${name}`), { 
+                    lat: pos.coords.latitude, 
+                    lng: pos.coords.longitude,
+                    timestamp: Date.now()
+                });
                 localStorage.setItem('rr_city', city);
                 localStorage.setItem('rr_name', name);
-                location.reload();
-            });
+                document.getElementById('reg-screen').style.display = 'none';
+                document.getElementById('success-screen').style.display = 'flex';
+                initApp(city, name);
+            }, () => alert("GPS access is required for tracking."), {enableHighAccuracy: true});
         });
 
-        // Initialize App
+        // Auto-Start
         const savedCity = localStorage.getItem('rr_city');
         const savedName = localStorage.getItem('rr_name');
         if (savedCity && savedName) {
@@ -134,44 +173,70 @@
         }
 
         function initApp(city, name) {
+            if (map) return;
             map = L.map('map', { zoomControl: false }).setView([0,0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
+            // User Geofence
             onValue(ref(db, `cities/${city}/residents/${name}`), (snap) => {
                 const d = snap.val();
-                if(d) {
-                    geofence = L.circle([d.lat, d.lng], { radius: 400, color: '#e74c3c' }).addTo(map);
+                if(d && !geofence) {
+                    geofence = L.circle([d.lat, d.lng], { radius: 400, color: '#e74c3c', fillOpacity: 0.1 }).addTo(map);
                     map.flyTo([d.lat, d.lng], 16);
                 }
             });
 
+            // Truck Tracking
             onValue(ref(db, `cities/${city}/active_fleet`), (snap) => {
-                const fleet = snap.val();
-                if(!fleet) return;
+                const fleet = snap.val(); if(!fleet) return;
                 Object.values(fleet).forEach(t => {
                     if(!truckMarker) truckMarker = L.marker([t.lat, t.lng], {icon: truckIcon}).addTo(map);
                     else truckMarker.setLatLng([t.lat, t.lng]);
-                    const dist = map.distance([t.lat, t.lng], geofence.getLatLng());
-                    document.getElementById('status-text').innerHTML = dist <= 400 ? "🚨 ACTION: BINS OUT!" : `🚚 ${(dist/1000).toFixed(2)}km AWAY`;
+                    
+                    if(geofence) {
+                        const dist = map.distance([t.lat, t.lng], geofence.getLatLng());
+                        document.getElementById('status-text').innerHTML = dist <= 400 ? "🚨 ACTION: BINS OUT!" : `🚚 ${(dist/1000).toFixed(2)}km AWAY`;
+                    }
                 });
             });
 
-            // Start Dynamic Banners
-            startDynamicBanners(city);
+            start10SlotRotation();
         }
 
-        function startDynamicBanners(city) {
-            const adEl = document.getElementById('ad-content');
-            
-            // Cycle Bottom Ads (Local Businesses)
-            onValue(ref(db, `cities/${city}/active_ads`), (snap) => {
-                const ads = snap.val() ? Object.values(snap.val()) : [{text: "Support Local Businesses!"}];
-                let i = 0;
-                setInterval(() => {
-                    adEl.innerHTML = `<strong>${ads[i].text}</strong>`;
-                    i = (i + 1) % ads.length;
-                }, 8000);
-            });
+        // 10-SLOT AD ROTATION (1 MINUTE EACH)
+        function start10SlotRotation() {
+            const slots = [
+                { biz: "Potch Hardware", msg: "Special: 10% off all wheelie bins!" },
+                { biz: "Daily Coffee", msg: "Show this app for a free refill." },
+                { biz: "Super Spar", msg: "Fresh groceries, daily deals." },
+                { biz: "Mooirivier Mall", msg: "Safe parking & great shopping." },
+                { biz: "Local Butchery", msg: "Best biltong in the North West!" },
+                { biz: "Potch Pharmacy", msg: "Your health is our priority." },
+                { biz: "Green Garden", msg: "Keep Potch beautiful. Buy 1 tree get 1 free." },
+                { biz: "Auto Tech", msg: "Truck tracking is smart. Service your car today." },
+                { biz: "Pizza Perfect", msg: "Tuesday 2-for-1 Specials!" },
+                { biz: "Clean Sweep", msg: "Professional garden waste removal." }
+            ];
+
+            const adContainer = document.getElementById('ad-slot');
+            let currentIdx = 0;
+
+            const updateAd = () => {
+                adContainer.classList.add('fade-out');
+                setTimeout(() => {
+                    const ad = slots[currentIdx];
+                    adContainer.innerHTML = `
+                        <div style="font-size:9px; color:#aaa; margin-bottom:2px; letter-spacing:1px;">ADVERTISEMENT • POWERED BY RUBBISHROUTER</div>
+                        <strong style="color:var(--dark);">${ad.biz}:</strong> <span style="color:#555;">${ad.msg}</span>
+                        <div style="font-size:10px; color:var(--beta); font-weight:bold; margin-top:2px;">SLOT ${currentIdx+1} / 10</div>
+                    `;
+                    adContainer.classList.remove('fade-out');
+                    currentIdx = (currentIdx + 1) % slots.length;
+                }, 500);
+            };
+
+            updateAd();
+            setInterval(updateAd, 60000); // 1-minute rotation
         }
     </script>
 </body>
