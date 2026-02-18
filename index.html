@@ -2,48 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RubbishRouter | Potchefstroom Resident Portal</title>
+    <title>RubbishRouter | Resident Portal</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <style>
         :root { --primary: #27ae60; --dark: #2c3e50; --alert: #e74c3c; --accent: #f1c40f; --beta: #3498db; }
         body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; overflow: hidden; background: #f4f7f6; }
         
-        /* Ticker Style - Top Banner */
-        #top-ad {
-            position: absolute; top: 0; left: 0; right: 0; height: 50px;
-            background: var(--dark); color: white; z-index: 3000;
-            display: flex; align-items: center; overflow: hidden;
-            border-bottom: 3px solid var(--accent);
-        }
-        .ticker-text {
-            white-space: nowrap; padding-left: 100%;
-            animation: ticker 30s linear infinite;
-            font-size: 14px; font-weight: bold;
-        }
+        /* Banners */
+        #top-ad { position: absolute; top: 0; left: 0; right: 0; height: 50px; background: var(--dark); color: white; z-index: 3000; display: flex; align-items: center; overflow: hidden; border-bottom: 3px solid var(--accent); }
+        .ticker-text { white-space: nowrap; padding-left: 100%; animation: ticker 30s linear infinite; font-size: 14px; font-weight: bold; }
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
-        /* Rotating Slot - Bottom Banner */
-        #bottom-ad {
-            position: absolute; bottom: 0; left: 0; right: 0; height: 85px;
-            background: white; z-index: 3000; border-top: 1px solid #ddd;
-            display: flex; align-items: center; justify-content: center;
-        }
+        #bottom-ad { position: absolute; bottom: 0; left: 0; right: 0; height: 85px; background: white; z-index: 3000; border-top: 1px solid #ddd; display: flex; align-items: center; justify-content: center; }
         .ad-slot-container { text-align: center; transition: opacity 0.5s ease-in-out; width: 100%; padding: 0 15px; }
         .ad-slot-container.fade-out { opacity: 0; }
 
-        /* Interface Layers */
+        /* Trial Countdown Badge */
+        #trial-counter {
+            position: absolute; top: 65px; right: 10px; background: white; padding: 8px 12px;
+            border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 3500; display: none; border: 2px solid var(--primary); cursor: pointer; pointer-events: auto;
+        }
+        .trial-urgent { border-color: var(--alert) !important; color: var(--alert); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        /* Lockout Overlay (Trial Expired) */
+        #lockout-screen {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); color: white;
+            z-index: 9000; display: none; flex-direction: column; align-items: center;
+            justify-content: center; padding: 30px; text-align: center; backdrop-filter: blur(5px);
+        }
+
+        /* Standard Screens */
         .overlay-screen { position: fixed; inset: 0; background: white; z-index: 6000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
-        .content-width { max-width: 400px; width: 100%; }
         #map { height: 100vh; width: 100%; z-index: 1; }
-        
         #ui-overlay { position: absolute; top: 65px; left: 10px; right: 10px; z-index: 2000; pointer-events: none; }
         .status-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; pointer-events: auto; border: 3px solid var(--primary); }
         
-        /* Buttons */
         .btn-main { padding: 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; margin-top: 10px; cursor: pointer; width: 100%; }
-        .btn-biz { background: var(--accent); color: var(--dark); border: none; padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; width: 100%; }
-        
+        .btn-pay-now { background: #ff5722; color: white; padding: 20px; border-radius: 12px; font-size: 20px; font-weight: bold; border: none; cursor: pointer; width: 100%; max-width: 300px; box-shadow: 0 5px 15px rgba(255,87,34,0.4); }
         .fab { position: fixed; z-index: 4000; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); color: white; display: flex; align-items: center; justify-content: center; }
         #help-btn { bottom: 100px; left: 15px; width: 45px; height: 45px; font-size: 20px; background: var(--dark); }
         #token-btn { bottom: 100px; right: 15px; width: 60px; height: 60px; font-size: 28px; background: #ff5722; }
@@ -51,48 +49,49 @@
 </head>
 <body>
 
+    <div id="lockout-screen">
+        <div style="font-size: 60px;">🛑</div>
+        <h1 style="margin: 10px 0;">Trial Expired</h1>
+        <p style="margin-bottom: 25px; opacity: 0.9;">Your 14-day free access has ended. To continue tracking the municipal fleet, please subscribe to our service.</p>
+        <button onclick="window.location.href='pay.html'" class="btn-pay-now">SUBSCRIBE & PAY R15</button>
+        <p style="margin-top: 20px; font-size: 12px; color: #aaa;">Service provided by RubbishRouter (PTY) LTD</p>
+    </div>
+
+    <div id="trial-counter" onclick="window.location.href='pay.html'">⏳ Checking Trial...</div>
+
     <div id="onboarding-screen" class="overlay-screen">
-        <div class="content-width">
-            <h1 id="onboard-title" style="color:var(--primary); margin-bottom:0;">RubbishRouter</h1>
-            <p style="color:#666; margin-top:5px;">Smart Waste Tracking Portal</p>
-            <div style="text-align:left; background:#f9f9f9; padding:15px; border-radius:10px; margin:20px 0;">
-                <small style="color:var(--primary); font-weight:bold;">FOR RESIDENTS:</small>
-                <p style="font-size:13px; margin:5px 0;">Track municipal trucks in real-time and get "Bins Out" notifications.</p>
-            </div>
-            <button id="onboard-action-btn" onclick="handleOnboardClick()" class="btn-main">CONTINUE TO SETUP</button>
-            <button onclick="window.location.href='pay.html'" class="btn-biz">💼 BUSINESS: BOOK AN AD SLOT</button>
+        <div style="max-width:400px;">
+            <h1 style="color:var(--primary); margin-bottom:0;">RubbishRouter</h1>
+            <p style="color:#666;">Potchefstroom Smart Waste Portal</p>
+            <button onclick="handleOnboardClick()" class="btn-main">CONTINUE TO SETUP</button>
+            <button onclick="window.location.href='pay.html'" style="background:var(--accent); color:var(--dark); border:none; padding:15px; border-radius:10px; font-weight:bold; margin-top:15px; cursor:pointer; width:100%;">💼 BUSINESS: BOOK AN AD SLOT</button>
         </div>
     </div>
 
     <div id="reg-screen" class="overlay-screen" style="display: none;">
-        <div class="content-width">
+        <div style="max-width:400px; width:100%;">
             <h2>Resident Profile</h2>
-            <p style="font-size:14px; color:#666;">Enter your details to link your address.</p>
-            <input type="text" id="res-name" style="padding:15px; width:100%; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing: border-box;" placeholder="Full Name">
-            <input type="text" id="res-city" style="padding:15px; width:100%; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing: border-box;" placeholder="City (Potchefstroom)">
+            <input type="text" id="res-name" style="padding:15px; width:100%; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;" placeholder="Full Name">
+            <input type="text" id="res-city" style="padding:15px; width:100%; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;" placeholder="City (e.g. Potchefstroom)">
             <button id="main-reg-btn" class="btn-main">ACTIVATE BETA ACCESS</button>
         </div>
     </div>
 
     <div id="success-screen" class="overlay-screen" style="display: none;">
-        <div class="content-width">
+        <div style="max-width:400px;">
             <div style="font-size:50px;">🎉</div>
-            <h1 style="color:var(--primary); margin:10px 0;">You're In!</h1>
-            <p style="color:#666;">Your 2-week free trial of the tracking service is now active.</p>
+            <h1 style="color:var(--primary);">You're In!</h1>
+            <p>Your 14-day free trial is now active. We'll notify you when it's time to subscribe.</p>
             <button onclick="closeSuccess()" class="btn-main">START TRACKING</button>
         </div>
     </div>
 
     <div id="top-ad">
-        <div class="ticker-text">
-            ⚠️ MUNICIPAL NOTICE: PLEASE PLACE BINS ON PAVEMENT BY 07:00 AM • WASTE COLLECTION ON SCHEDULE FOR WARD 4 • POWERED BY RUBBISHROUTER SMART CITY TECH
-        </div>
+        <div class="ticker-text">⚠️ MUNICIPAL NOTICE: PLEASE PLACE BINS ON PAVEMENT BY 07:00 AM • WASTE COLLECTION ON SCHEDULE • POWERED BY RUBBISHROUTER</div>
     </div>
 
     <div id="bottom-ad">
-        <div id="ad-slot" class="ad-slot-container">
-            <strong>Initializing local ad-stream...</strong>
-        </div>
+        <div id="ad-slot" class="ad-slot-container"><strong>Loading local sponsors...</strong></div>
     </div>
 
     <div id="ui-overlay">
@@ -117,93 +116,83 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-
         let map, geofence, truckMarker;
         const truckIcon = L.icon({ iconUrl: 'https://img.icons8.com/color/96/garbage-truck.png', iconSize: [50, 50] });
 
-        // Navigation & UI Logic
+        // Logic
         window.handleOnboardClick = () => {
-            if (localStorage.getItem('rr_name')) {
-                document.getElementById('onboarding-screen').style.display = 'none';
-            } else {
-                document.getElementById('onboarding-screen').style.display = 'none';
-                document.getElementById('reg-screen').style.display = 'flex';
-            }
+            if (localStorage.getItem('rr_name')) document.getElementById('onboarding-screen').style.display = 'none';
+            else { document.getElementById('onboarding-screen').style.display = 'none'; document.getElementById('reg-screen').style.display = 'flex'; }
         };
 
-        window.showHelp = () => {
-            document.getElementById('onboard-title').innerText = "Help & Business Portal";
-            document.getElementById('onboard-action-btn').innerText = "BACK TO MAP";
-            document.getElementById('onboarding-screen').style.display = 'flex';
-        };
+        window.showHelp = () => { document.getElementById('onboarding-screen').style.display = 'flex'; };
+        window.closeSuccess = () => { document.getElementById('success-screen').style.display = 'none'; };
 
-        window.closeSuccess = () => {
-            document.getElementById('success-screen').style.display = 'none';
-            if(confirm("Trial active! Would you like to secure your R15 monthly subscription now to prevent service interruption?")) {
-                window.location.href = 'pay.html';
-            }
-        };
-
-        // Registration Process
         document.getElementById('main-reg-btn').addEventListener('click', () => {
             const name = document.getElementById('res-name').value;
             const city = document.getElementById('res-city').value;
-            if(!name || !city) return alert("Please fill in all fields.");
-
+            if(!name || !city) return;
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 await set(ref(db, `cities/${city}/residents/${name}`), { 
-                    lat: pos.coords.latitude, 
-                    lng: pos.coords.longitude,
-                    timestamp: Date.now()
+                    lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: Date.now() 
                 });
-                localStorage.setItem('rr_city', city);
-                localStorage.setItem('rr_name', name);
+                localStorage.setItem('rr_city', city); localStorage.setItem('rr_name', name);
                 document.getElementById('reg-screen').style.display = 'none';
                 document.getElementById('success-screen').style.display = 'flex';
                 initApp(city, name);
-            }, () => alert("GPS access is required for tracking."), {enableHighAccuracy: true});
+            });
         });
 
-        // Auto-Start
         const savedCity = localStorage.getItem('rr_city');
         const savedName = localStorage.getItem('rr_name');
-        if (savedCity && savedName) {
-            document.getElementById('onboarding-screen').style.display = 'none';
-            initApp(savedCity, savedName);
-        }
+        if (savedCity && savedName) { document.getElementById('onboarding-screen').style.display = 'none'; initApp(savedCity, savedName); }
 
         function initApp(city, name) {
             if (map) return;
             map = L.map('map', { zoomControl: false }).setView([0,0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-            // User Geofence
             onValue(ref(db, `cities/${city}/residents/${name}`), (snap) => {
                 const d = snap.val();
-                if(d && !geofence) {
-                    geofence = L.circle([d.lat, d.lng], { radius: 400, color: '#e74c3c', fillOpacity: 0.1 }).addTo(map);
-                    map.flyTo([d.lat, d.lng], 16);
+                if(d) {
+                    // --- TRIAL & LOCKOUT LOGIC ---
+                    const regDate = d.timestamp || (Date.now() - 86400000); 
+                    const msLeft = (regDate + (14 * 24 * 60 * 60 * 1000)) - Date.now();
+                    const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+                    
+                    const counter = document.getElementById('trial-counter');
+                    counter.style.display = 'block';
+
+                    if (daysLeft <= 0) {
+                        document.getElementById('lockout-screen').style.display = 'flex';
+                        counter.innerHTML = "❌ TRIAL EXPIRED";
+                    } else {
+                        counter.innerHTML = `⏳ ${daysLeft} DAYS TRIAL LEFT`;
+                        if(daysLeft <= 3) counter.classList.add('trial-urgent');
+                    }
+                    // -----------------------------
+
+                    if(!geofence) {
+                        geofence = L.circle([d.lat, d.lng], { radius: 400, color: '#e74c3c', fillOpacity: 0.1 }).addTo(map);
+                        map.flyTo([d.lat, d.lng], 16);
+                    }
                 }
             });
 
-            // Truck Tracking
             onValue(ref(db, `cities/${city}/active_fleet`), (snap) => {
                 const fleet = snap.val(); if(!fleet) return;
                 Object.values(fleet).forEach(t => {
                     if(!truckMarker) truckMarker = L.marker([t.lat, t.lng], {icon: truckIcon}).addTo(map);
                     else truckMarker.setLatLng([t.lat, t.lng]);
-                    
                     if(geofence) {
                         const dist = map.distance([t.lat, t.lng], geofence.getLatLng());
                         document.getElementById('status-text').innerHTML = dist <= 400 ? "🚨 ACTION: BINS OUT!" : `🚚 ${(dist/1000).toFixed(2)}km AWAY`;
                     }
                 });
             });
-
             start10SlotRotation();
         }
 
-        // 10-SLOT AD ROTATION (1 MINUTE EACH)
         function start10SlotRotation() {
             const slots = [
                 { biz: "Potch Hardware", msg: "Special: 10% off all wheelie bins!" },
@@ -217,26 +206,18 @@
                 { biz: "Pizza Perfect", msg: "Tuesday 2-for-1 Specials!" },
                 { biz: "Clean Sweep", msg: "Professional garden waste removal." }
             ];
-
             const adContainer = document.getElementById('ad-slot');
             let currentIdx = 0;
-
             const updateAd = () => {
                 adContainer.classList.add('fade-out');
                 setTimeout(() => {
                     const ad = slots[currentIdx];
-                    adContainer.innerHTML = `
-                        <div style="font-size:9px; color:#aaa; margin-bottom:2px; letter-spacing:1px;">ADVERTISEMENT • POWERED BY RUBBISHROUTER</div>
-                        <strong style="color:var(--dark);">${ad.biz}:</strong> <span style="color:#555;">${ad.msg}</span>
-                        <div style="font-size:10px; color:var(--beta); font-weight:bold; margin-top:2px;">SLOT ${currentIdx+1} / 10</div>
-                    `;
+                    adContainer.innerHTML = `<div style="font-size:9px; color:#aaa;">ADVERTISEMENT • POWERED BY RUBBISHROUTER</div><strong>${ad.biz}:</strong> ${ad.msg}<div style="font-size:10px; color:var(--beta); font-weight:bold;">SLOT ${currentIdx+1}/10</div>`;
                     adContainer.classList.remove('fade-out');
                     currentIdx = (currentIdx + 1) % slots.length;
                 }, 500);
             };
-
-            updateAd();
-            setInterval(updateAd, 60000); // 1-minute rotation
+            updateAd(); setInterval(updateAd, 60000);
         }
     </script>
 </body>
