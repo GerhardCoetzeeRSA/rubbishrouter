@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RubbishRouter | Business Advertising Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root { --primary: #27ae60; --dark: #2c3e50; --accent: #f7941d; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; margin: 0; display: flex; justify-content: center; }
+        .biz-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 480px; }
+        h2 { color: var(--dark); margin-top: 0; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #555; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        .tier-box { background: #fff9f0; border: 1px solid #ffe0b2; padding: 15px; border-radius: 10px; margin: 15px 0; }
+        .tier-option { font-size: 13px; color: #666; margin-bottom: 5px; }
+        .btn-zapper { background: var(--accent); color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 20px; transition: transform 0.2s; }
+        .btn-zapper:active { transform: scale(0.98); }
+        .footer-info { font-size: 11px; color: #999; text-align: center; margin-top: 20px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<div class="biz-card">
+    <h2>Promote Your Business</h2>
+    <p style="font-size:14px; color:#666;">Targeting residents in: <strong id="muni-display" style="color:var(--primary);">Detecting...</strong></p>
+
+    <label>Business Name</label>
+    <input type="text" id="biz-name" placeholder="e.g., Potch Hardware">
+
+    <label>Ad Message (Max 60 chars)</label>
+    <textarea id="biz-msg" placeholder="e.g., 10% off all bins this Saturday!" maxlength="60" rows="2"></textarea>
+
+    <label>Website / WhatsApp Link</label>
+    <input type="url" id="biz-link" placeholder="https://yourwebsite.com">
+
+    <label>Choose Your Exposure</label>
+    <div class="tier-box">
+        <div class="tier-option">💎 <strong>Premium Fixed:</strong> R450 pm (Top Banner)</div>
+        <div class="tier-option">🔄 <strong>Rotating Slot:</strong> R70 pw (Bottom Banner)</div>
+        <select id="ad-tier">
+            <option value="450.00">Premium Fixed - R450.00 (Monthly)</option>
+            <option value="70.00">Rotating Slot - R70.00 (Weekly)</option>
+        </select>
+    </div>
+
+    <div style="font-size: 12px; color: #444; margin-top: 10px;">
+        <input type="checkbox" id="tos-check"> I agree to the Advertising Terms & Conditions.
+    </div>
+
+    <button onclick="submitAdAndPay()" class="btn-zapper">
+        PROCEED TO ZAPPER
+    </button>
+
+    <div class="footer-info">
+        Coetzee Data AI Consultants (Pty) Ltd | Reg: 2025/428324/07<br>
+        Your ad will go live once payment is verified via Zapper.
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getDatabase, ref, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAm4QtyA82HBJ-VwBgIlzRHmDgzxxhryNY",
+        databaseURL: "https://rubbishrouter-688b2-default-rtdb.firebaseio.com/",
+        projectId: "rubbishrouter-688b2",
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // --- MUNI DETECTION ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const muni = urlParams.get('muni') || "Potchefstroom";
+    document.getElementById('muni-display').innerText = muni;
+
+    // --- ZAPPER & SUBMISSION LOGIC ---
+    window.submitAdAndPay = async () => {
+        const name = document.getElementById('biz-name').value.trim();
+        const msg = document.getElementById('biz-msg').value.trim();
+        const link = document.getElementById('biz-link').value.trim();
+        const amount = document.getElementById('ad-tier').value;
+        const tos = document.getElementById('tos-check').checked;
+
+        if (!name || !msg || !link) {
+            alert("Please complete all fields.");
+            return;
+        }
+        if (!tos) {
+            alert("Please accept the Terms & Conditions.");
+            return;
+        }
+
+        // 1. Save Ad to Firebase (Inactive state)
+        const tierLabel = amount === "450.00" ? "fixed" : "rotating";
+        const adRef = push(ref(db, `municipalities/${muni}/ads/${tierLabel}`));
+        
+        try {
+            await set(adRef, {
+                name: name,
+                msg: msg,
+                link: link,
+                active: false, // Will be set to true by webhook upon payment
+                timestamp: serverTimestamp()
+            });
+
+            // 2. Generate Zapper Redirect
+            // Using your provided Merchant ID: 76032 and Site ID: 96013
+            const merchantID = "76032";
+            const siteID = "96013";
+            const reference = `RR-${muni.substring(0,3).toUpperCase()}-${tierLabel.toUpperCase()}-${Date.now().toString().slice(-4)}`;
+            
+            // Version 1 Deep Link / Web Redirect Structure
+            const zapperBase = "https://www.zapper.com/pay/payment.aspx";
+            const finalUrl = `${zapperBase}?merchantId=${merchantID}&siteId=${siteID}&amount=${amount}&reference=${reference}`;
+
+            // 3. Redirect to Zapper
+            window.location.href = finalUrl;
+
+        } catch (error) {
+            console.error("Database error:", error);
+            alert("Connection error. Please try again.");
+        }
+    };
+</script>
+</body>
+</html>
