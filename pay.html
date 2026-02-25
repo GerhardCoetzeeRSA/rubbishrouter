@@ -2,49 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RubbishRouter | Secure Payment</title>
+    <title>RubbishRouter | Resident Subscription</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root { --primary: #0066cc; --zapper: #f7941d; }
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 40px 20px; background: #f4f7f6; }
-        .pay-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        .price { font-size: 48px; font-weight: bold; color: var(--primary); margin: 20px 0; }
-        .btn-zapper { background: var(--zapper); color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        img.z-logo { height: 25px; }
+        :root { --primary: #27ae60; --dark: #2c3e50; --accent: #f7941d; --blue: #0066cc; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .pay-card { background: white; padding: 35px; border-radius: 25px; box-shadow: 0 12px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .logo-area { margin-bottom: 20px; }
+        .price-circle { width: 120px; height: 120px; background: #fff3e0; border: 3px solid var(--accent); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 auto 25px; }
+        .price-val { font-size: 32px; font-weight: bold; color: var(--dark); }
+        .price-label { font-size: 14px; color: #666; }
+        h2 { color: var(--dark); margin: 0 0 10px 0; }
+        p { color: #555; font-size: 15px; line-height: 1.5; margin-bottom: 25px; }
+        .btn-zapper { background: var(--accent); color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform 0.2s; }
+        .btn-zapper:active { transform: scale(0.97); }
+        .z-icon { height: 24px; filter: brightness(0) invert(1); }
+        .footer-info { font-size: 11px; color: #aaa; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="pay-card">
-        <img src="https://www.zapper.com/assets/images/zapper-logo.png" alt="Zapper" class="z-logo" style="height:40px; margin-bottom:10px;">
-        <h2>Resident Access</h2>
-        <p>Subscribe to continue receiving live truck alerts and ETAs for your street.</p>
-        
-        <div class="price">R15<span style="font-size:18px;">/pm</span></div>
+<div class="pay-card">
+    <div class="logo-area">
+        <img src="https://www.zapper.com/assets/images/zapper-logo.png" alt="Zapper" style="height: 35px;">
+    </div>
+    
+    <h2>Resident Access</h2>
+    <p>Get real-time truck alerts, neighbor updates, and live ETA tracking for your street.</p>
 
-        <button class="btn-zapper" onclick="payWithZapper()">
-            PAY WITH ZAPPER
-        </button>
-        
-        <p style="font-size:12px; color:#666; margin-top:20px;">
-            Merchant: Coetzee Data AI Consultants Pty (Ltd)<br>
-            Secure payment powered by Zapper.
-        </p>
+    <div class="price-circle">
+        <div class="price-val">R15</div>
+        <div class="price-label">per month</div>
     </div>
 
-    <script>
-        function payWithZapper() {
-            const merchantID = "76032";
-            const siteID = "96013";
-            const amount = "15.00";
-            const reference = "RR-SUB-" + Math.floor(Math.random()*1000000);
-            
-            // Version 1 Deep Link / Web Redirect
-            // This will open the Zapper App on phone or a payment web page
-            const zapperUrl = `https://www.zapper.com/pay/payment.aspx?merchantId=${merchantID}&siteId=${siteID}&amount=${amount}&reference=${reference}`;
-            
-            window.location.href = zapperUrl;
-        }
-    </script>
+    <button onclick="payResidentSub()" class="btn-zapper">
+        <img src="https://cdn-icons-png.flaticon.com/512/825/825561.png" class="z-icon">
+        PAY WITH ZAPPER
+    </button>
+
+    <div class="footer-info">
+        <strong>Coetzee Data AI Consultants (Pty) Ltd</strong><br>
+        Reg: 2025/428324/07<br>
+        <span style="color:var(--primary);">Secure Encryption Enabled</span>
+    </div>
+</div>
+
+<script>
+    function payResidentSub() {
+        // --- ZAPPER CREDENTIALS ---
+        const merchantID = "76032";
+        const siteID = "96013";
+        const amount = "15.00";
+        
+        // Generate a unique reference for the resident
+        // Using a timestamp to ensure it's unique
+        const reference = "RR-RES-" + Date.now().toString().slice(-6);
+
+        // Zapper V1 Redirect URL
+        const zapperBase = "https://www.zapper.com/pay/payment.aspx";
+        const finalUrl = `${zapperBase}?merchantId=${merchantID}&siteId=${siteID}&amount=${amount}&reference=${reference}`;
+
+        // Redirect user to Zapper
+        window.location.href = finalUrl;
+    }
+</script>
+
 </body>
 </html>
